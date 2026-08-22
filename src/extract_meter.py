@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 
-IMAGE_PATH = Path("data/sample/sample_01.jpeg")
+IMAGE_PATH = Path("data/sample/sample_03.jpeg")
 
 load_dotenv()
 
