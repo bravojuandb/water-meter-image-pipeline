@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Literal
 
@@ -38,3 +39,13 @@ def find_images(input_dir: Path) -> list[Path]:
             valid_paths.append(item)
 
     return sorted(valid_paths)
+
+
+def write_results(output_path: Path, results: Iterable[BatchResult]) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with output_path.open("w", encoding="utf-8") as output_file:
+        for result in results:
+            output_file.write(result.model_dump_json())
+            output_file.write("\n")
+            output_file.flush()
