@@ -8,6 +8,13 @@ from pydantic import BaseModel, ConfigDict
 
 IMAGE_PATH = Path("data/sample/sample_03.jpeg")
 
+IMAGE_MEDIA_TYPES = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+}
+
 load_dotenv()
 
 client = OpenAI()
@@ -23,12 +30,20 @@ class MeterData(BaseModel):
     reading_red: str | None
 
 
-def encode_image(image_path: Path) -> str:
-    return base64.b64encode(image_path.read_bytes()).decode("utf-8")
+def image_to_data_url(image_path: Path) -> str:
+    suffix = image_path.suffix.lower()
+
+    try:
+        media_type = IMAGE_MEDIA_TYPES[suffix]
+    except KeyError as exc:
+        raise ValueError(f"Unsupported image type: {image_path}") from exc
+
+    image_base64 = base64.b64encode(image_path.read_bytes()).decode("utf-8")
+    return f"data:{media_type};base64,{image_base64}"
 
 
 def extract_meter_data(image_path: Path) -> MeterData:
-    image_base64 = encode_image(image_path)
+    image_url = image_to_data_url(image_path)
 
     response = client.responses.create(
         model="gpt-5.6-luna",
@@ -58,7 +73,7 @@ Return JSON only.
                     },
                     {
                         "type": "input_image",
-                        "image_url": f"data:image/jpeg;base64,{image_base64}",
+                        "image_url": image_url,
                     },
                 ],
             }

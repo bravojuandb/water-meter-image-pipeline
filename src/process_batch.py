@@ -9,11 +9,9 @@ def find_images(input_dir: Path) -> list[Path]:
         raise NotADirectoryError(f"Input directory does not exist: {input_dir}")
 
     valid_paths: list[Path] = []
-    
+
     for item in input_dir.rglob("*"):
         if item.is_file() and item.suffix.lower() in SUPPORTED_EXTENSIONS:
             valid_paths.append(item)
 
     return sorted(valid_paths)
-
-
