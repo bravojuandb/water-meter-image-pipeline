@@ -1,7 +1,30 @@
 from pathlib import Path
+from typing import Literal
 
+from pydantic import BaseModel, ConfigDict
 
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+
+
+class BatchSuccess(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_file: str
+    status: Literal["success"] = "success"
+    data: dict[str, str | None]
+    error: None = None
+
+
+class BatchFailure(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_file: str
+    status: Literal["failed"] = "failed"
+    data: None = None
+    error: str
+
+
+BatchResult = BatchSuccess | BatchFailure
 
 
 def find_images(input_dir: Path) -> list[Path]:
