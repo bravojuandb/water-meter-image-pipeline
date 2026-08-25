@@ -7,12 +7,22 @@ from pydantic import BaseModel, ConfigDict
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
 
-class BatchSuccess(BaseModel):
+class BatchValid(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     source_file: str
-    status: Literal["success"] = "success"
+    status: Literal["valid"] = "valid"
     data: dict[str, str | None]
+    error: None = None
+
+
+class BatchInvalid(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_file: str
+    status: Literal["invalid"] = "invalid"
+    data: dict[str, str | None]
+    missing_fields: list[str]
     error: None = None
 
 
@@ -25,7 +35,7 @@ class BatchFailure(BaseModel):
     error: str
 
 
-BatchResult = BatchSuccess | BatchFailure
+BatchResult = BatchValid | BatchInvalid | BatchFailure
 
 
 MeterValues = dict[str, str | None]
@@ -52,7 +62,7 @@ def process_images(
     for image_path in image_paths:
         try:
             data = extractor(image_path)
-            yield BatchSuccess(
+            yield BatchValid(
                 source_file=str(image_path),
                 data=data,
             )
