@@ -5,6 +5,10 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+REQUIRED_FIELDS = (
+    "meter_serial_number",
+    "reading_black",
+)
 
 
 class BatchValid(BaseModel):
@@ -42,6 +46,10 @@ MeterValues = dict[str, str | None]
 Extractor = Callable[[Path], MeterValues]
 
 
+def is_missing(value: str | None) -> bool:
+    return value is None or value.strip() == ""
+
+
 def find_images(input_dir: Path) -> list[Path]:
     if not input_dir.is_dir():
         raise NotADirectoryError(f"Input directory does not exist: {input_dir}")
@@ -62,10 +70,22 @@ def process_images(
     for image_path in image_paths:
         try:
             data = extractor(image_path)
-            yield BatchValid(
-                source_file=str(image_path),
-                data=data,
-            )
+            missing_fields = [
+                field_name
+                for field_name in REQUIRED_FIELDS
+                if is_missing(data.get(field_name))
+            ]
+            if missing_fields:
+                yield BatchInvalid(
+                    source_file=str(image_path),
+                    data=data,
+                    missing_fields=missing_fields,
+                )
+            else:
+                yield BatchValid(
+                    source_file=str(image_path),
+                    data=data,
+                )
         except Exception as exc:
             yield BatchFailure(
                 source_file=str(image_path),
