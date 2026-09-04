@@ -5,7 +5,8 @@ Extract structured meter data from water meter images with the OpenAI API.
 Output consists of the extracted water meter data and a status of `valid`,
 `invalid`, or `failed`.
 
-Example output for one image:
+
+## Example output for one image
 
 ```txt
 Images: 1
@@ -25,6 +26,17 @@ Total: 49.731s
   "error": null
 }
 ```
+
+### Result statuses
+
+- `valid`: extraction completed and both `meter_serial_number` and
+  `reading_black` are non-empty.
+- `invalid`: extraction completed, but either required field is empty.
+- `failed`: extraction raised an error while reading the image, calling the API,
+  or parsing the response.
+
+Field-format and numerical validation are deliberately out of scope.
+
 
 ## Setup specific for macOS users
 
@@ -52,8 +64,7 @@ Create the input directory and add the water meter images:
 mkdir -p data/raw
 ```
 
-The `data/raw` directory is ignored by Git because meter images may contain
-private data. The pipeline supports JPG, JPEG, PNG, and WebP images.
+The `data/raw` directory is ignored by Git. The pipeline supports JPG, JPEG, PNG, and WebP images.
 
 Run the pipeline:
 
