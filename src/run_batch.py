@@ -1,8 +1,8 @@
-from pathlib import Path
 import time
+from pathlib import Path
 
 from src.extract_meter import extract_meter_data
-from src.process_batch import find_images, process_images, MeterValues
+from src.process_batch import MeterValues, find_images, process_images
 
 
 def extract_meter_values(image_path: Path) -> MeterValues:
@@ -25,6 +25,7 @@ def main() -> None:
 
     for result in results:
         print(result.model_dump_json(indent=2))
+
 
 if __name__ == "__main__":
     main()
