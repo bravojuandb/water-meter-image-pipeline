@@ -2,7 +2,6 @@ import json
 import time
 from pathlib import Path
 
-from src.extract_meter import extract_meter_data
 from src.process_batch import (
     MeterValues,
     find_images,
@@ -12,6 +11,8 @@ from src.process_batch import (
 
 
 def extract_meter_values(image_path: Path) -> MeterValues:
+    from src.extract_meter import extract_meter_data
+
     meter_data = extract_meter_data(image_path)
     return meter_data.model_dump()
 
