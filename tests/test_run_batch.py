@@ -1,6 +1,10 @@
 import json
+from pathlib import Path
 
-from src.run_batch import load_processed_files
+from src.run_batch import (
+    load_processed_files,
+    filter_unprocessed_images,
+)
 
 
 def test_missing_file_returns_empty_set(tmp_path):
@@ -27,3 +31,11 @@ def test_existing_file_returns_unique_source_files(tmp_path):
 
     filenames = load_processed_files(output_path)
     assert filenames == {"file_01", "file_02"}
+
+
+def test_filter_unprocessed_images_skips_processed_files():
+    files_found = [Path("A.jpg"), Path("B.jpg"), Path("C.jpg")]
+    processed_files = {"B.jpg"}
+    result = filter_unprocessed_images(files_found, processed_files)
+
+    assert result == [Path("A.jpg"), Path("C.jpg")]
