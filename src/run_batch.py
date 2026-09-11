@@ -1,4 +1,5 @@
 import json
+import csv
 import time
 from pathlib import Path
 
@@ -40,6 +41,49 @@ def filter_unprocessed_images(
             files_to_process.append(image_path)
 
     return files_to_process
+
+def export_csv(jsonl_path: Path, csv_path: Path) -> None:
+
+    records_to_export = []
+
+    with jsonl_path.open("r", encoding="utf-8") as jsonl_file:
+        for line in jsonl_file:
+            record = json.loads(line)
+            if record["status"] in ("valid", "invalid"):
+                records_to_export.append(record)
+
+    fieldnames = [
+        "source_file",
+        "status",
+        "maker_name",
+        "meter_model_code",
+        "meter_serial_number",
+        "reading_black",
+        "reading_red",
+    ]
+
+    with csv_path.open("w", encoding="utf-8", newline="") as csv_file:
+        writer_tool = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer_tool.writeheader()
+
+        for record in records_to_export:
+            data = record["data"]
+            row = {
+                "source_file": record["source_file"],
+                "status": record["status"],
+                "maker_name": data.get("maker_name"),
+                "meter_model_code": data.get("meter_model_code"),
+                "meter_serial_number": data.get("meter_serial_number"),
+                "reading_black": data.get("reading_black"),
+                "reading_red": data.get("reading_red"),
+            }
+
+            writer_tool.writerow(row)
+
+
+
+
+
 
 def main() -> None:
     start = time.perf_counter()
