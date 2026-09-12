@@ -1,31 +1,29 @@
 # Water Meter Image Pipeline
 
-Extract structured meter data from water meter images with the OpenAI API.
+A Python batch pipeline that uses the OpenAI API to extract water meter data
+from images and reduce manual transcription. It saves all results to JSONL,
+exports valid and invalid readings to CSV for human review, and skips
+previously recorded image paths on subsequent runs.
 
-Output consists of the extracted water meter data and a status of `valid`,
+- Input: `data/raw/` (must be created by the user).
+- JSONL output: `data/clean/results.jsonl`.
+- CSV output: `data/clean/results.csv`.
+
+JSONL output consists of the extracted water meter data and a status of `valid`,
 `invalid`, or `failed`.
 
 
-## Example output for one image
+## Example output in stdout after processing one image
 
 ```txt
 Images: 1
 Discovery: 0.001s
 Processing: 49.731s
 Total: 49.731s
-{
-  "source_file": "data/raw/image_01.jpeg",
-  "status": "valid",
-  "data": {
-    "maker_name": "DIEHL Metering",
-    "meter_model_code": "H231/A",
-    "meter_serial_number": "2045490",
-    "reading_black": "000124",
-    "reading_red": "82"
-  },
-  "error": null
-}
 ```
+
+`Images` counts all discovered images, including previously processed images
+that are skipped. It is not the count of newly processed images.
 
 ### Result statuses
 
@@ -39,6 +37,9 @@ Field-format and numerical validation are deliberately out of scope.
 
 
 ## Setup specific for macOS users
+
+Run all setup and pipeline commands from the repository root so relative paths
+resolve correctly.
 
 ```sh
 python3 -m venv .venv
@@ -72,5 +73,15 @@ Run the pipeline:
 python3 -m src.run_batch
 ```
 
-Results are printed to standard output. Each image is classified as `valid`,
-`invalid`, or `failed`.
+All results are saved to `data/clean/results.jsonl`, one JSON record per line.
+Each record has separate `status` and `data` fields. The status is `valid`,
+`invalid`, or `failed`; failed records have `data: null` and an error message.
+
+`data/clean/results.csv` contains only valid and invalid records, including their
+source paths, statuses, and extracted data. The CSV is overwritten on every run
+using the entire JSONL history.
+
+On subsequent runs, images whose source paths are already recorded in JSONL are
+skipped, including previously invalid and failed results. Only images with
+unrecorded source paths are sent to the API. Their results are appended to JSONL;
+existing records are left unchanged. This check compares paths, not image contents.

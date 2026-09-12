@@ -87,13 +87,17 @@ def export_csv(jsonl_path: Path, csv_path: Path) -> None:
 
 def main() -> None:
     start = time.perf_counter()
-    input_dir = Path("data/raw")
-    output_path = Path("data/clean/results.jsonl")
 
-    files_found = find_images(input_dir)
+    DATA_DIR = Path("data")
+    INPUT_DIR = DATA_DIR / "raw"
+    OUTPUT_JSON = DATA_DIR / "clean" / "results.jsonl"
+
+    OUTPUT_CSV = DATA_DIR / "clean" / "results.csv"
+
+    files_found = find_images(INPUT_DIR)
     after_discovery = time.perf_counter()
 
-    processed_files = load_processed_files(output_path)
+    processed_files = load_processed_files(OUTPUT_JSON)
 
     files_to_process = filter_unprocessed_images(
         files_found, 
@@ -101,9 +105,11 @@ def main() -> None:
     )
 
     results = process_images(files_to_process, extract_meter_values)
-    write_results(output_path, results)
+    write_results(OUTPUT_JSON, results)
 
     after_processing = time.perf_counter()
+
+    export_csv(OUTPUT_JSON, OUTPUT_CSV )
 
     print(f"Images: {len(files_found)}")
     print(f"Discovery: {after_discovery - start:.3f}s")
