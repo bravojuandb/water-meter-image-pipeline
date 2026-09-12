@@ -222,3 +222,5 @@ data/raw
 AGENTS.md
 design_template.md
 .DS_Store
+data/clean
+.vscode

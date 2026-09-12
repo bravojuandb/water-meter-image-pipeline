@@ -96,7 +96,7 @@ def process_images(
 def write_results(output_path: Path, results: Iterable[BatchResult]) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with output_path.open("w", encoding="utf-8") as output_file:
+    with output_path.open("a", encoding="utf-8") as output_file:
         for result in results:
             output_file.write(result.model_dump_json())
             output_file.write("\n")
